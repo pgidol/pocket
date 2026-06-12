@@ -1,0 +1,109 @@
+// ============================================
+// Pocket — 日系和风配色系统
+// ============================================
+
+// ---------- 品牌主色 ----------
+$color-primary: #F2A7B3;        // 樱花粉
+$color-primary-light: #F8CDD4;
+$color-primary-dark: #D4838F;
+$color-secondary: #A8D8EA;      // 天空蓝
+$color-secondary-light: #C5E8F3;
+$color-accent: #FFC3A0;         // 暖杏色
+$color-accent-dark: #E8A67E;
+
+// ---------- 背景色 · 和纸质感 ----------
+$bg-main: #FFF8F0;              // 暖白
+$bg-card: #FFFDFB;
+$bg-elevated: #FFFFFF;
+$bg-overlay: rgba(242, 167, 179, 0.08);
+$bg-modal: rgba(0, 0, 0, 0.55);
+
+// ---------- 文字色 ----------
+$text-primary: #2C2C2E;
+$text-secondary: #6B6B6F;
+$text-tertiary: #9E9EA3;
+$text-inverse: #FFFFFF;
+
+// ---------- 边框与分割线 ----------
+$border-color: rgba(44, 44, 46, 0.08);
+$border-light: rgba(242, 167, 179, 0.2);
+$divider: rgba(44, 44, 46, 0.06);
+
+// ---------- 稀有度色彩系统 ----------
+$rarity-n-start: #B0B0B0;
+$rarity-n-end: #D4D4D4;
+$rarity-n: linear-gradient(135deg, $rarity-n-start, $rarity-n-end);
+
+$rarity-r-start: #5B9BD5;
+$rarity-r-end: #7EC8E3;
+$rarity-r: linear-gradient(135deg, $rarity-r-start, $rarity-r-end);
+
+$rarity-sr-start: #9B59B6;
+$rarity-sr-end: #E8B84B;
+$rarity-sr: linear-gradient(135deg, $rarity-sr-start, $rarity-sr-end);
+
+$rarity-ssr-start: #FFD700;
+$rarity-ssr-end: #FF6347;
+$rarity-ssr: linear-gradient(135deg, $rarity-ssr-start, $rarity-ssr-end);
+
+$rarity-ur-1: #FF0080;
+$rarity-ur-2: #7928CA;
+$rarity-ur-3: #00D4FF;
+$rarity-ur-4: #FFD700;
+$rarity-ur: linear-gradient(135deg, $rarity-ur-1, $rarity-ur-2, $rarity-ur-3, $rarity-ur-4);
+
+// ---------- 稀有度文字色 ----------
+$rarity-text-n: #888888;
+$rarity-text-r: #4A90D9;
+$rarity-text-sr: #A855F7;
+$rarity-text-ssr: #F59E0B;
+$rarity-text-ur: #EC4899;
+
+// ---------- 功能色 ----------
+$color-success: #34C759;
+$color-warning: #FF9F0A;
+$color-danger: #FF3B30;
+$color-info: #5AC8FA;
+
+// ---------- 字体 ----------
+$font-primary: 'HarmonyOS Sans SC', 'HarmonyOS Sans', 'Noto Sans JP', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+$font-display: 'HarmonyOS Sans SC', 'HarmonyOS Sans', 'Zen Maru Gothic', 'Noto Serif SC', serif;
+
+// ---------- 圆角 ----------
+$radius-xs: 4px;
+$radius-sm: 8px;
+$radius-md: 12px;
+$radius-lg: 16px;
+$radius-xl: 24px;
+$radius-full: 9999px;
+
+// ---------- 阴影 ----------
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+$shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+$shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
+$shadow-glow-primary: 0 0 20px rgba(242, 167, 179, 0.4);
+$shadow-glow-gold: 0 0 20px rgba(255, 215, 0, 0.5);
+$shadow-glow-rainbow: 0 0 30px rgba(121, 40, 202, 0.4), 0 0 60px rgba(255, 0, 128, 0.2);
+
+// ---------- 动画 ----------
+$transition-fast: 0.15s ease;
+$transition-normal: 0.3s ease;
+$transition-slow: 0.5s ease;
+$transition-spring: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+// ---------- 间距 ----------
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-2xl: 48px;
+
+// ---------- 层级 ----------
+$z-base: 1;
+$z-dropdown: 100;
+$z-sticky: 200;
+$z-modal: 1000;
+$z-toast: 2000;
+$z-splash: 9999;

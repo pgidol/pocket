@@ -1,0 +1,278 @@
+@use './variables.scss' as *;
+
+// ============================================
+// 全局样式 · 日系和风
+// ============================================
+
+// ---------- Google Fonts ----------
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap');
+@import url('https://registry.npmmirror.com/@lobehub/webfont-harmony-sans-sc/latest/files/css/index.css');
+
+// ---------- UI Library Font Overrides ----------
+:root:root {
+  --el-font-family: #{$font-primary} !important;
+  --van-base-font: #{$font-primary} !important;
+}
+
+// ---------- Reset ----------
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: $font-primary;
+  color: $text-primary;
+  background-color: $bg-main;
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+
+  // 和纸纹理背景
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(242, 167, 179, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(168, 216, 234, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(255, 195, 160, 0.04) 0%, transparent 70%);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-family: inherit;
+  background: transparent;
+}
+
+input, textarea {
+  border: none;
+  outline: none;
+  font-family: inherit;
+}
+
+// ---------- 滚动条美化 ----------
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba($color-primary, 0.3);
+  border-radius: $radius-full;
+
+  &:hover {
+    background: rgba($color-primary, 0.5);
+  }
+}
+
+// ---------- 通用容器 ----------
+.page-container {
+  min-height: 100vh;
+  padding: $spacing-md;
+  padding-bottom: calc(60px + env(safe-area-inset-bottom) + $spacing-md);
+}
+
+.card-container {
+  background: $bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  padding: $spacing-lg;
+  border: 1px solid $border-color;
+}
+
+// ---------- 文字工具 ----------
+.text-display {
+  font-family: $font-display;
+  font-weight: 700;
+}
+
+.text-gradient-primary {
+  background: linear-gradient(135deg, $color-primary, $color-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #FFD700, #FFA500, #FF8C00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-rainbow {
+  background: linear-gradient(135deg, $rarity-ur-1, $rarity-ur-2, $rarity-ur-3, $rarity-ur-4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// ---------- 按钮 ----------
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  padding: 12px 24px;
+  border-radius: $radius-md;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all $transition-normal;
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity $transition-fast;
+  }
+
+  &:active::after {
+    opacity: 1;
+  }
+}
+
+.btn-primary {
+  @extend .btn;
+  background: linear-gradient(135deg, $color-primary, $color-accent);
+  color: $text-inverse;
+  box-shadow: $shadow-glow-primary;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.btn-secondary {
+  @extend .btn;
+  background: $bg-elevated;
+  color: $color-primary;
+  border: 1.5px solid $border-light;
+
+  &:active {
+    background: $bg-overlay;
+    transform: scale(0.96);
+  }
+}
+
+.btn-gold {
+  @extend .btn;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #5D3A00;
+  box-shadow: $shadow-glow-gold;
+  font-weight: 700;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+// ---------- 稀有度徽章 ----------
+.rarity-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 10px;
+  border-radius: $radius-full;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: $text-inverse;
+
+  &.rarity-n { background: $rarity-n; }
+  &.rarity-r { background: $rarity-r; }
+  &.rarity-sr { background: $rarity-sr; }
+  &.rarity-ssr { background: $rarity-ssr; }
+  &.rarity-ur {
+    background: $rarity-ur;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+}
+
+// ---------- 页面过渡 ----------
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.35s ease;
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-12px);
+}
+
+// ---------- 通用淡入动画 ----------
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity $transition-normal;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+// ---------- 弹出动画 ----------
+.popup-enter-active {
+  animation: popup-in 0.35s ease forwards;
+}
+
+.popup-leave-active {
+  animation: popup-out 0.25s ease forwards;
+}
+
+@keyframes popup-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.85) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes popup-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
