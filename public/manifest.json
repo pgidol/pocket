@@ -1,0 +1,17 @@
+{
+  "name": "Pocket — 二次元抽卡收集",
+  "short_name": "Pocket",
+  "description": "Pocket — 二次元在线抽卡收集游戏，收集属于你的幻境角色卡牌",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F2A7B3",
+  "theme_color": "#F2A7B3",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
