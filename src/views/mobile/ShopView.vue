@@ -10,23 +10,23 @@
     </header>
 
     <div class="shop-content">
-      <!-- 钻石礼包区 -->
+      <!-- 钻石兑换金币 -->
       <section class="shop-section">
-        <h3 class="section-title"><span class="section-icon">💎</span> 钻石礼包</h3>
+        <h3 class="section-title"><span class="section-icon">💰</span> 钻石兑换金币</h3>
         <div class="product-grid">
           <div
-            v-for="item in diamondPacks"
+            v-for="item in goldExchangePacks"
             :key="item.id"
-            class="product-card"
+            class="product-card gold-exchange-card"
             :class="{ featured: item.featured }"
             @click="handleBuy(item)"
           >
-            <div v-if="item.tag" class="product-tag">{{ item.tag }}</div>
+            <div v-if="item.tag" class="product-tag gold-tag">{{ item.tag }}</div>
             <span class="product-icon">{{ item.icon }}</span>
             <h4 class="product-name">{{ item.name }}</h4>
             <p class="product-desc">{{ item.desc }}</p>
-            <div class="product-price">
-              <span class="price-icon">💰</span>
+            <div class="product-price diamond-price">
+              <span class="price-icon">💎</span>
               <span class="price-value">{{ item.price }}</span>
             </div>
           </div>
@@ -119,11 +119,11 @@ const showConfirm = ref(false);
 const confirmItem = ref(null);
 const isBuying = ref(false);
 
-const diamondPacks = [
-  { id: 'diamond_small', name: '小钻石包', desc: '30 钻石', icon: '💎', price: 500, currency: 'gold', tag: null, featured: false },
-  { id: 'diamond_medium', name: '中钻石包', desc: '80 钻石', icon: '💎', price: 1200, currency: 'gold', tag: '推荐', featured: true },
-  { id: 'diamond_large', name: '大钻石包', desc: '200 钻石', icon: '💎', price: 2800, currency: 'gold', tag: '超值', featured: false },
-  { id: 'diamond_mega', name: '至尊钻石包', desc: '500 钻石', icon: '💎', price: 6000, currency: 'gold', tag: '限定', featured: true },
+const goldExchangePacks = [
+  { id: 'gold_100', name: '金币小包', desc: '10,000 金币', icon: '💰', price: 100, currency: 'diamond', tag: null, featured: false },
+  { id: 'gold_200', name: '金币中包', desc: '22,000 金币', icon: '💰', price: 200, currency: 'diamond', tag: '推荐', featured: true },
+  { id: 'gold_500', name: '金币大包', desc: '60,000 金币', icon: '💰', price: 500, currency: 'diamond', tag: '超值', featured: false },
+  { id: 'gold_1000', name: '金币至尊包', desc: '130,000 金币', icon: '💰', price: 1000, currency: 'diamond', tag: '最划算', featured: true },
 ];
 
 const specialItems = [
@@ -322,6 +322,26 @@ const confirmBuy = async () => {
   &:active {
     transform: scale(0.98);
     background: $bg-overlay;
+  }
+}
+
+// 钻石兑换金币卡片
+.gold-exchange-card {
+  &.featured {
+    border-color: rgba($color-warning, 0.4);
+    box-shadow: 0 4px 16px rgba($color-warning, 0.15);
+  }
+}
+
+.gold-tag {
+  background: linear-gradient(135deg, $color-warning, #FFD54F) !important;
+}
+
+.diamond-price {
+  background: rgba($color-info, 0.1) !important;
+
+  .price-value {
+    color: #5B9BD5 !important;
   }
 }
 

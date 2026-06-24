@@ -79,37 +79,13 @@
       </div>
     </div>
 
-    <!-- 卡牌列表 -->
-    <div class="card-pool-header">
-      <h3>我的卡牌</h3>
-      <span class="card-count-label">{{ availableCards.length }}张可用</span>
-    </div>
-    <div class="card-pool">
-      <div
-        v-for="card in availableCards"
-        :key="card.userCardId"
-        class="pool-card"
-        :class="{ 'in-team': isInTeam(card.userCardId), selected: selectedCardId === card.userCardId }"
-        @click="selectCard(card)"
-      >
-        <div :class="['pool-card-frame', `mini-frame-${card.rarity.toLowerCase()}`]">
-          <span class="pool-emoji">{{ factionEmoji(card.series) }}</span>
-        </div>
-        <div class="pool-card-info">
-          <span class="pool-card-name">{{ card.name }}</span>
-          <div class="pool-card-meta">
-            <span :class="['rarity-badge', `rarity-${card.rarity.toLowerCase()}`]">{{ card.rarity }}</span>
-            <span class="pool-card-level">Lv.{{ card.level || 1 }}</span>
-          </div>
-        </div>
-        <span v-if="isInTeam(card.userCardId)" class="in-team-badge">已上阵</span>
-      </div>
-
-      <div v-if="availableCards.length === 0" class="pool-empty">
-        <p>没有卡牌，先去抽卡吧！</p>
-        <button class="btn-primary" @click="router.push({ name: ROUTE_NAMES.GACHA })">去抽卡</button>
-      </div>
-    </div>
+    <!-- 卡牌选择器 -->
+    <CardSelector
+      :cards="availableCards"
+      :selected-id="selectedCardId"
+      :in-team-ids="inTeamCardIds"
+      @select="selectCard"
+    />
 
     <!-- 底部操作栏 -->
     <div class="bottom-actions">
@@ -134,6 +110,7 @@ import { useRouter } from 'vue-router';
 import { useBattleStore, useTeamStore, useCardStore, useUserStore, useUiStore } from '../../stores/index.js';
 import { ROUTE_NAMES } from '../../utils/constants.js';
 import request from '../../services/request.js';
+import CardSelector from '../../components/mobile/CardSelector.vue';
 
 const router = useRouter();
 const battleStore = useBattleStore();
@@ -166,6 +143,9 @@ const availableCards = computed(() => {
 
 const getSlotCard = (pos) => teamCards.value.find((c) => c.position === pos);
 const isInTeam = (userCardId) => teamCards.value.some((c) => c.userCardId === userCardId);
+
+/** 已在队伍中的卡牌 ID 列表（传递给 CardSelector） */
+const inTeamCardIds = computed(() => teamCards.value.map((c) => c.userCardId));
 
 const selectCard = (card) => {
   if (isInTeam(card.userCardId)) return;
@@ -504,104 +484,6 @@ onMounted(async () => {
 .mini-frame-sr { background: $rarity-sr; }
 .mini-frame-ssr { background: $rarity-ssr; }
 .mini-frame-ur { background: $rarity-ur; }
-
-// ========== 卡牌池 ==========
-.card-pool-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px 8px;
-
-  h3 {
-    font-size: 14px;
-    font-weight: 600;
-    color: $text-primary;
-  }
-}
-
-.card-count-label {
-  font-size: 12px;
-  color: $text-tertiary;
-}
-
-.card-pool {
-  padding: 0 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.pool-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  background: $bg-card;
-  border-radius: $radius-md;
-  border: 1.5px solid $border-color;
-  transition: all $transition-normal;
-  cursor: pointer;
-
-  &.selected {
-    border-color: $color-primary;
-    box-shadow: 0 0 8px rgba($color-primary, 0.2);
-  }
-
-  &.in-team {
-    opacity: 0.5;
-  }
-
-  &:active { transform: scale(0.98); }
-}
-
-.pool-card-frame {
-  width: 40px;
-  height: 40px;
-  border-radius: $radius-sm;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pool-emoji { font-size: 18px; }
-
-.pool-card-info { flex: 1; }
-
-.pool-card-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: $text-primary;
-  display: block;
-}
-
-.pool-card-meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 2px;
-}
-
-.pool-card-level {
-  font-size: 11px;
-  color: $text-tertiary;
-}
-
-.in-team-badge {
-  font-size: 10px;
-  color: $text-tertiary;
-  padding: 2px 8px;
-  background: $bg-overlay;
-  border-radius: $radius-full;
-}
-
-.pool-empty {
-  text-align: center;
-  padding: 40px 0;
-  color: $text-tertiary;
-  font-size: 14px;
-
-  .btn-primary { margin-top: 12px; }
-}
 
 // ========== 底部操作栏 ==========
 .bottom-actions {

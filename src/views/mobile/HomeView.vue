@@ -187,6 +187,7 @@ const quickActions = [
   { name: 'bag', icon: '🎒', label: '背包', to: { name: ROUTE_NAMES.BAG }, color: '#FFC3A0' },
   { name: 'shop', icon: '🏪', label: '商店', to: { name: ROUTE_NAMES.SHOP }, color: '#B8A9C9' },
   { name: 'team', icon: '👥', label: '编队', to: { name: ROUTE_NAMES.TEAM_FORM }, color: '#90EE90' },
+  { name: 'equipment', icon: '🛡️', label: '装备', to: { name: ROUTE_NAMES.EQUIPMENT }, color: '#D4A574' },
 ];
 
 /** 底部 Tab */
@@ -206,6 +207,7 @@ const menuItems = [
   { name: 'shop', icon: '🏪', label: '商店', to: { name: ROUTE_NAMES.SHOP } },
   { name: 'battle', icon: '⚔️', label: '战斗', to: { name: ROUTE_NAMES.BATTLE_MAP } },
   { name: 'team', icon: '👥', label: '编队', to: { name: ROUTE_NAMES.TEAM_FORM } },
+  { name: 'equipment', icon: '🛡️', label: '装备', to: { name: ROUTE_NAMES.EQUIPMENT } },
   { name: 'checkin', icon: '📅', label: '签到', to: { name: ROUTE_NAMES.CHECKIN } },
   { name: 'profile', icon: '👤', label: '个人中心', to: { name: ROUTE_NAMES.PROFILE } },
 ];

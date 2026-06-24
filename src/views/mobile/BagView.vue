@@ -3,106 +3,90 @@
     <header class="page-header">
       <button class="back-btn" @click="router.push({ name: ROUTE_NAMES.HOME })">←</button>
       <h1 class="header-title text-display">我的背包</h1>
-      <div class="header-count">{{ myCards.length }}张</div>
+      <div class="header-placeholder"></div>
     </header>
 
-    <!-- 排序切换 -->
-    <div class="sort-bar">
+    <!-- 分类 Tab -->
+    <div class="category-tabs">
       <button
-        v-for="opt in sortOptions"
-        :key="opt.key"
-        class="sort-btn"
-        :class="{ active: sortBy === opt.key }"
-        @click="sortBy = opt.key"
+        v-for="cat in categories"
+        :key="cat.key"
+        class="category-tab"
+        :class="{ active: activeCategory === cat.key }"
+        @click="activeCategory = cat.key"
       >
-        {{ opt.label }}
+        <span class="cat-icon">{{ cat.icon }}</span>
+        <span class="cat-label">{{ cat.label }}</span>
+        <span v-if="cat.count > 0" class="cat-count">{{ cat.count }}</span>
       </button>
     </div>
 
-    <!-- 卡牌列表 -->
-    <div v-if="sortedCards.length > 0" class="card-list">
-      <div
-        v-for="card in sortedCards"
-        :key="card.cardId"
-        class="bag-card"
-        @click="openDetail(card)"
-      >
-        <div :class="['card-frame', `card-frame-${card.rarity.toLowerCase()}`, 'card-size-sm']">
-          <div class="card-inner">
-            <div class="card-image">
-              <span class="card-placeholder-icon">{{ factionEmoji(card.series) }}</span>
+    <!-- 装备分类 -->
+    <div v-if="activeCategory === 'equipment'" class="bag-content">
+      <!-- 装备列表 -->
+      <div v-if="equipmentItems.length > 0" class="item-list">
+        <div
+          v-for="item in equipmentItems"
+          :key="item.id"
+          class="item-card"
+          @click="handleEquipmentClick(item)"
+        >
+          <div :class="['item-icon-frame', `frame-${(item.rarity || 'n').toLowerCase()}`]">
+            <span class="item-emoji">{{ slotIcon(item.slot) }}</span>
+          </div>
+          <div class="item-info">
+            <span class="item-name">{{ item.name }}</span>
+            <div class="item-meta">
+              <span :class="['rarity-badge', `rarity-${(item.rarity || 'n').toLowerCase()}`]">
+                {{ item.rarity || 'N' }}
+              </span>
+              <span class="item-slot-label">{{ slotLabel(item.slot) }}</span>
+              <span v-if="item.level > 0" class="item-level">+{{ item.level }}</span>
             </div>
-            <div class="card-name">{{ card.name }}</div>
+          </div>
+          <div class="item-status">
+            <span v-if="item.isEquipped" class="equipped-badge">已装备</span>
           </div>
         </div>
-        <div class="bag-card-info">
-          <span :class="['rarity-badge', `rarity-${card.rarity.toLowerCase()}`]">{{ card.rarity }}</span>
-          <span class="card-count">×{{ card.count }}</span>
+      </div>
+
+      <!-- 装备空状态 -->
+      <div v-else class="empty-state">
+        <div class="empty-icon-wrap">
+          <span class="empty-icon">🛡️</span>
         </div>
+        <h3 class="empty-title">暂无装备</h3>
+        <p class="empty-desc">装备系统即将上线，届时可在此管理您的召唤师装备</p>
+        <button class="btn-primary empty-action" @click="router.push({ name: ROUTE_NAMES.EQUIPMENT })">
+          查看装备系统
+        </button>
       </div>
     </div>
 
-    <!-- 空状态 -->
-    <div v-else class="empty-state">
-      <span class="empty-icon">🎴</span>
-      <p class="empty-text">背包空空如也</p>
-      <button class="btn-primary" @click="router.push({ name: ROUTE_NAMES.GACHA })">去抽卡</button>
-    </div>
-
-    <!-- 卡牌详情弹窗 -->
-    <Teleport to="body">
-      <transition name="fade">
-        <div v-if="selectedCard" class="detail-overlay" @click="selectedCard = null">
-          <div class="detail-container" @click.stop>
-            <button class="close-btn" @click="selectedCard = null">✕</button>
-
-            <div class="detail-card-wrapper">
-              <div
-                :class="[
-                  'card-frame',
-                  `card-frame-${selectedCard.rarity.toLowerCase()}`,
-                  'card-size-xl',
-                  'detail-card',
-                  { flipped: isFlipped }
-                ]"
-                @click="isFlipped = !isFlipped"
-              >
-                <div class="card-front">
-                  <div class="card-inner">
-                    <div class="card-image">
-                      <span class="card-placeholder-icon-lg">{{ factionEmoji(selectedCard.series) }}</span>
-                    </div>
-                    <div class="card-name">{{ selectedCard.name }}</div>
-                    <span :class="['rarity-badge', `rarity-${selectedCard.rarity.toLowerCase()}`]">
-                      {{ selectedCard.rarity }}
-                    </span>
-                  </div>
-                </div>
-                <div class="card-back">
-                  <div class="card-inner card-back-content">
-                    <div class="back-pattern"></div>
-                    <h3 class="back-title">{{ selectedCard.name }}</h3>
-                    <div class="back-faction">
-                      <span class="faction-icon">{{ factionEmoji(selectedCard.series) }}</span>
-                      <span class="faction-name">{{ factionName(selectedCard.series) }}</span>
-                    </div>
-                    <p class="back-story">{{ selectedCard.description || '这位角色的故事尚未被揭开...' }}</p>
-                    <div class="back-meta">
-                      <span>持有 ×{{ selectedCard.count }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <p class="flip-hint">💡 点击卡牌翻转查看故事</p>
-            <div class="detail-actions">
-              <button class="btn-primary detail-action-btn" @click="goUpgrade(selectedCard)">📈 养成升级</button>
-              <button class="btn-secondary detail-action-btn" @click="goTeam">👥 编队</button>
-            </div>
+    <!-- 纪念品分类 -->
+    <div v-if="activeCategory === 'souvenir'" class="bag-content">
+      <div class="empty-state">
+        <div class="empty-icon-wrap">
+          <span class="empty-icon">🏆</span>
+        </div>
+        <h3 class="empty-title">暂无纪念品</h3>
+        <p class="empty-desc">冒险途中收集的珍贵纪念品将在这里展示<br />更多精彩内容即将推出</p>
+        <div class="coming-features">
+          <div class="feature-tag">
+            <span>🎖️</span>
+            <span>成就奖章</span>
+          </div>
+          <div class="feature-tag">
+            <span>📜</span>
+            <span>通关证书</span>
+          </div>
+          <div class="feature-tag">
+            <span>🎁</span>
+            <span>限定纪念</span>
           </div>
         </div>
-      </transition>
-    </Teleport>
+      </div>
+    </div>
 
     <!-- 底部 Tab -->
     <nav class="bottom-tabs">
@@ -123,79 +107,39 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { useCardStore } from '../../stores/index.js';
-import { ROUTE_NAMES, RARITY_ORDER } from '../../utils/constants.js';
-import request from '../../services/request.js';
+import { useUiStore } from '../../stores/index.js';
+import { ROUTE_NAMES, EQUIPMENT_SLOTS } from '../../utils/constants.js';
 
 const router = useRouter();
-const cardStore = useCardStore();
+const uiStore = useUiStore();
 
-const sortBy = ref('rarity');
-const selectedCard = ref(null);
-const isFlipped = ref(false);
+const activeCategory = ref('equipment');
 
-const sortOptions = [
-  { key: 'rarity', label: '按稀有度' },
-  { key: 'count', label: '按数量' },
-  { key: 'time', label: '按获取时间' },
-];
+/** 装备物品列表（暂无数据，预留接口） */
+const equipmentItems = ref([]);
 
-const myCards = computed(() => cardStore.myCards);
+/** 分类配置 */
+const categories = computed(() => [
+  { key: 'equipment', label: '装备', icon: '🛡️', count: equipmentItems.value.length },
+  { key: 'souvenir', label: '纪念品', icon: '🏆', count: 0 },
+]);
 
-const sortedCards = computed(() => {
-  const cards = [...myCards.value];
-  switch (sortBy.value) {
-    case 'rarity':
-      return cards.sort((a, b) => (RARITY_ORDER[b.rarity] || 0) - (RARITY_ORDER[a.rarity] || 0));
-    case 'count':
-      return cards.sort((a, b) => b.count - a.count);
-    case 'time':
-      return cards.sort((a, b) => new Date(b.obtainedAt) - new Date(a.obtainedAt));
-    default:
-      return cards;
-  }
-});
-
-const factionEmoji = (series) => {
-  const map = { celestial: '☀️', demon: '🌙', mortal: '🌸' };
-  return map[series] || '🎴';
+/** 获取槽位图标 */
+const slotIcon = (slot) => {
+  return EQUIPMENT_SLOTS[slot]?.icon || '📦';
 };
 
-const factionName = (series) => {
-  const map = { celestial: '天界', demon: '魔界', mortal: '人间' };
-  return map[series] || '未知';
+/** 获取槽位名称 */
+const slotLabel = (slot) => {
+  return EQUIPMENT_SLOTS[slot]?.label || '未知';
 };
 
-// 打开详情时重置翻转状态
-const openDetail = (card) => {
-  selectedCard.value = card;
-  isFlipped.value = false;
+const handleEquipmentClick = (item) => {
+  uiStore.toast(`${item.name} — 装备详情即将开放`, 'info');
 };
-
-// 跳转养成页面
-const goUpgrade = (card) => {
-  selectedCard.value = null;
-  const id = card.userCardId || card.cardId || card.id;
-  router.push({ name: ROUTE_NAMES.CARD_UPGRADE, params: { id } });
-};
-
-// 跳转编队页面
-const goTeam = () => {
-  selectedCard.value = null;
-  router.push({ name: ROUTE_NAMES.TEAM_FORM });
-};
-
-onMounted(async () => {
-  try {
-    const cards = await request.get('/user/cards');
-    cardStore.setMyCards(cards || []);
-  } catch {
-    // 静默处理
-  }
-});
 </script>
 
 <style lang="scss" scoped>
@@ -205,6 +149,7 @@ onMounted(async () => {
   padding-bottom: 70px;
 }
 
+// ========== 页头 ==========
 .page-header {
   display: flex;
   align-items: center;
@@ -234,236 +179,224 @@ onMounted(async () => {
   font-size: 18px;
 }
 
-.header-count {
-  font-size: 13px;
-  color: $text-tertiary;
-  font-weight: 500;
+.header-placeholder {
+  width: 36px;
 }
 
-// 排序栏
-.sort-bar {
+// ========== 分类 Tab ==========
+.category-tabs {
   display: flex;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: 10px;
+  padding: 14px 16px;
 }
 
-.sort-btn {
-  padding: 6px 14px;
-  border-radius: $radius-full;
-  font-size: 12px;
-  font-weight: 500;
+.category-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
   background: $bg-card;
-  color: $text-secondary;
-  border: 1px solid $border-color;
+  border-radius: $radius-lg;
+  border: 1.5px solid $border-color;
   transition: all $transition-normal;
+  cursor: pointer;
+  position: relative;
 
   &.active {
-    background: linear-gradient(135deg, $color-primary, $color-accent);
-    color: white;
-    border-color: transparent;
+    background: linear-gradient(135deg, rgba($color-primary, 0.12), rgba($color-accent, 0.08));
+    border-color: rgba($color-primary, 0.4);
+    box-shadow: 0 2px 8px rgba($color-primary, 0.1);
+  }
+
+  &:active {
+    transform: scale(0.97);
   }
 }
 
-// 卡牌列表
-.card-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  padding: 0 16px 16px;
+.cat-icon {
+  font-size: 20px;
 }
 
-.bag-card {
+.cat-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: $text-primary;
+}
+
+.cat-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  background: $color-primary;
+  padding: 1px 7px;
+  border-radius: $radius-full;
+  min-width: 18px;
+  text-align: center;
+}
+
+// ========== 背包内容 ==========
+.bag-content {
+  padding: 0 16px;
+}
+
+// ========== 物品列表 ==========
+.item-list {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
-.bag-card-info {
+.item-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: $bg-card;
+  border-radius: $radius-md;
+  border: 1px solid $border-color;
+  transition: all $transition-normal;
+  cursor: pointer;
+
+  &:active {
+    transform: scale(0.98);
+    background: $bg-overlay;
+  }
+}
+
+.item-icon-frame {
+  width: 46px;
+  height: 46px;
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.frame-n { background: $rarity-n; }
+.frame-r { background: $rarity-r; }
+.frame-sr { background: $rarity-sr; }
+.frame-ssr { background: $rarity-ssr; }
+.frame-ur { background: $rarity-ur; }
+
+.item-emoji {
+  font-size: 22px;
+}
+
+.item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: $text-primary;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-meta {
   display: flex;
   align-items: center;
   gap: 6px;
+  margin-top: 3px;
 }
 
-.card-count {
-  font-size: 12px;
+.item-slot-label {
+  font-size: 11px;
+  color: $text-tertiary;
+}
+
+.item-level {
+  font-size: 11px;
   font-weight: 600;
-  color: $text-secondary;
+  color: $color-success;
 }
 
-.card-placeholder-icon {
-  font-size: 32px;
+.item-status {
+  flex-shrink: 0;
 }
 
-// 空状态
+.equipped-badge {
+  font-size: 10px;
+  color: $color-primary-dark;
+  background: rgba($color-primary, 0.12);
+  padding: 3px 8px;
+  border-radius: $radius-full;
+  font-weight: 600;
+}
+
+// ========== 空状态 ==========
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 50vh;
-  gap: 12px;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.empty-icon-wrap {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba($color-primary, 0.08), rgba($color-accent, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
 }
 
 .empty-icon {
-  font-size: 64px;
-  opacity: 0.4;
+  font-size: 36px;
 }
 
-.empty-text {
-  font-size: 14px;
-  color: $text-tertiary;
-}
-
-// ========== 卡牌详情弹窗 ==========
-.detail-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.75);
-  z-index: $z-modal;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.detail-container {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.close-btn {
-  position: absolute;
-  top: -40px;
-  right: 0;
-  font-size: 20px;
-  color: rgba(255, 255, 255, 0.7);
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.detail-card-wrapper {
-  perspective: 1000px;
-}
-
-.detail-card {
-  position: relative;
-  transform-style: preserve-3d;
-  transition: transform 0.6s ease;
-  cursor: pointer;
-  overflow: visible !important; /* 关键：覆盖 .card-frame 带来的 overflow: hidden，恢复 3D 渲染上下文 */
-
-  &.flipped {
-    transform: rotateY(180deg);
-  }
-}
-
-.card-front,
-.card-back {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden; /* Webkit 浏览器（如 iOS Safari）兼容性支持 */
-}
-
-.card-back {
-  position: absolute;
-  inset: 0;
-  transform: rotateY(180deg);
-}
-
-.card-back-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  text-align: center;
-  position: relative;
-}
-
-.back-pattern {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 30% 30%, rgba($color-primary, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 70% 70%, rgba($color-secondary, 0.05) 0%, transparent 50%);
-  border-radius: inherit;
-}
-
-.back-title {
+.empty-title {
   font-size: 18px;
   font-weight: 700;
   color: $text-primary;
-  position: relative;
-  z-index: 1;
+  margin-bottom: 8px;
 }
 
-.back-faction {
+.empty-desc {
+  font-size: 13px;
+  color: $text-tertiary;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.empty-action {
+  padding: 10px 28px;
+  font-size: 14px;
+}
+
+// ========== 即将上线标签 ==========
+.coming-features {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.feature-tag {
   display: flex;
   align-items: center;
-  gap: 6px;
-  position: relative;
-  z-index: 1;
-}
-
-.faction-icon {
-  font-size: 16px;
-}
-
-.faction-name {
+  gap: 4px;
+  padding: 6px 12px;
+  background: $bg-card;
+  border: 1px solid $border-color;
+  border-radius: $radius-full;
   font-size: 12px;
   color: $text-secondary;
   font-weight: 500;
 }
 
-.back-story {
-  font-size: 12px;
-  line-height: 1.8;
-  color: $text-secondary;
-  padding: 0 12px;
-  position: relative;
-  z-index: 1;
-  max-height: 120px;
-  overflow-y: auto;
-}
-
-.back-meta {
-  font-size: 11px;
-  color: $text-tertiary;
-  position: relative;
-  z-index: 1;
-}
-
-.card-placeholder-icon-lg {
-  font-size: 56px;
-}
-
-.flip-hint {
-  margin-top: 16px;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.detail-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 16px;
-  width: 100%;
-  max-width: 280px;
-}
-
-.detail-action-btn {
-  flex: 1;
-  padding: 10px 12px;
-  font-size: 13px;
-  border-radius: $radius-md;
-}
-
-// 底部 Tab
+// ========== 底部 Tab ==========
 .bottom-tabs {
   position: fixed;
   bottom: 0;

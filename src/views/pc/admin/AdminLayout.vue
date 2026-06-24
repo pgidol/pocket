@@ -31,6 +31,10 @@
           <el-icon><User /></el-icon>
           <span>用户管理</span>
         </el-menu-item>
+        <el-menu-item index="/admin/stages">
+          <el-icon><MapLocation /></el-icon>
+          <span>关卡管理</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 
@@ -85,6 +89,7 @@ import {
   Calendar,
   User,
   ArrowDown,
+  MapLocation,
 } from '@element-plus/icons-vue';
 
 import { useAuthStore } from '../../../stores/index.js';
@@ -105,6 +110,7 @@ const currentRouteLabel = computed(() => {
     '/admin/cards': '卡牌数据管理',
     '/admin/pools': '限定卡池配置',
     '/admin/users': '玩家账户数据管理',
+    '/admin/stages': '关卡数据管理',
   };
   return map[route.path] || '主页';
 });

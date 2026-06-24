@@ -94,6 +94,12 @@ const mobileRoutes = [
     component: () => import('../views/mobile/CardUpgradeView.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/m/equipment',
+    name: ROUTE_NAMES.EQUIPMENT,
+    component: () => import('../views/mobile/EquipmentView.vue'),
+    meta: { requiresAuth: true },
+  },
 ];
 
 /**
@@ -141,6 +147,11 @@ const adminRoutes = [
         path: 'users',
         name: 'AdminUsers',
         component: () => import('../views/pc/admin/AdminUsers.vue'),
+      },
+      {
+        path: 'stages',
+        name: 'AdminStages',
+        component: () => import('../views/pc/admin/AdminStages.vue'),
       },
     ],
   },

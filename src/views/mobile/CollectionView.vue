@@ -6,17 +6,30 @@
       <span class="progress-badge">{{ cardStore.collectionProgress.owned }}/{{ cardStore.collectionProgress.total }}</span>
     </header>
 
-    <!-- 稀有度Tab -->
-    <div class="rarity-tabs">
-      <button
-        v-for="tab in rarityTabs"
-        :key="tab.key"
-        class="rarity-tab"
-        :class="[`tab-${tab.key.toLowerCase()}`, { active: activeTab === tab.key }]"
-        @click="activeTab = tab.key"
-      >
-        {{ tab.label }}
-      </button>
+    <!-- 筛选工具栏 -->
+    <div class="filter-toolbar">
+      <!-- 稀有度Tab -->
+      <div class="rarity-tabs">
+        <button
+          v-for="tab in rarityTabs"
+          :key="tab.key"
+          class="rarity-tab"
+          :class="[`tab-${tab.key.toLowerCase()}`, { active: activeTab === tab.key }]"
+          @click="activeTab = tab.key"
+        >
+          {{ tab.label }}
+        </button>
+      </div>
+      <!-- 仅看持有 -->
+      <div class="filter-toggles">
+        <button
+          class="toggle-btn"
+          :class="{ active: ownedOnly }"
+          @click="ownedOnly = !ownedOnly"
+        >
+          {{ ownedOnly ? '✅ 仅看持有' : '📋 全部' }}
+        </button>
+      </div>
     </div>
 
     <!-- 卡牌网格 -->
@@ -37,6 +50,21 @@
             <span class="card-placeholder-icon">{{ factionEmoji(card.series) }}</span>
           </div>
           <div class="card-name">{{ card.name }}</div>
+        </div>
+        <!-- 重新设计的卡牌等级与星级徽章 -->
+        <div v-if="getOwnedInfo(card.id)" class="card-badges">
+          <!-- 等级 -->
+          <div class="badge-level">
+            <span class="level-text">Lv.{{ getOwnedInfo(card.id).level || 1 }}</span>
+          </div>
+          <!-- 星级 -->
+          <div v-if="(getOwnedInfo(card.id).stars || 0) > 0" class="badge-stars">
+            <span v-for="s in getOwnedInfo(card.id).stars" :key="s" class="mini-star">★</span>
+          </div>
+        </div>
+        <!-- 持有数量 -->
+        <div v-if="getOwnedInfo(card.id)?.count > 1" class="badge-count">
+          ×{{ getOwnedInfo(card.id).count }}
         </div>
       </div>
     </div>
@@ -87,6 +115,25 @@
               </div>
             </div>
             <p class="flip-hint">💡 点击卡牌翻转查看故事</p>
+
+            <!-- 已持有卡牌的养成信息 -->
+            <div v-if="selectedOwnedInfo" class="detail-card-stats">
+              <div class="stat-chip">
+                <span class="stat-chip-label">等级</span>
+                <span class="stat-chip-value">Lv.{{ selectedOwnedInfo.level || 1 }}</span>
+              </div>
+              <div class="stat-chip">
+                <span class="stat-chip-label">星级</span>
+                <span class="stat-chip-value">
+                  <span v-for="s in 5" :key="s" :class="s <= (selectedOwnedInfo.stars || 0) ? 'star-on' : 'star-off'">★</span>
+                </span>
+              </div>
+              <div class="stat-chip">
+                <span class="stat-chip-label">持有</span>
+                <span class="stat-chip-value">×{{ selectedOwnedInfo.count || 1 }}</span>
+              </div>
+            </div>
+
             <div class="detail-actions">
               <button class="btn-primary detail-action-btn" @click="goUpgrade(selectedCard)">📈 养成升级</button>
               <button class="btn-secondary detail-action-btn" @click="goTeam">👥 编队</button>
@@ -128,6 +175,7 @@ const cardStore = useCardStore();
 const activeTab = ref('ALL');
 const selectedCard = ref(null);
 const isFlipped = ref(false);
+const ownedOnly = ref(false);
 
 const rarityTabs = [
   { key: 'ALL', label: '全部' },
@@ -138,6 +186,30 @@ const rarityTabs = [
   { key: 'UR', label: 'UR' },
 ];
 
+/** 持有卡牌信息的快速查询 Map（cardId → myCard）*/
+const ownedMap = computed(() => {
+  const map = new Map();
+  (cardStore.myCards || []).forEach((c) => {
+    if (c && c.cardId) {
+      map.set(c.cardId, c);
+    }
+  });
+  return map;
+});
+
+/**
+ * 获取已持有卡牌的养成信息
+ * @param {string} cardId
+ * @returns {Object|null}
+ */
+const getOwnedInfo = (cardId) => ownedMap.value.get(cardId) || null;
+
+/** 当前选中卡牌的持有信息 */
+const selectedOwnedInfo = computed(() => {
+  if (!selectedCard.value) return null;
+  return getOwnedInfo(selectedCard.value.id);
+});
+
 const filteredCards = computed(() => {
   let cards = [];
   if (activeTab.value === 'ALL') {
@@ -145,11 +217,26 @@ const filteredCards = computed(() => {
   } else {
     cards = (cardStore.cardsByRarity[activeTab.value] || []).filter((c) => c && c.id && c.rarity);
   }
-  // 默认高稀有度在前排序
+
+  // 仅看持有筛选
+  if (ownedOnly.value) {
+    cards = cards.filter((c) => cardStore.ownedCardIds.has(c.id));
+  }
+
+  // 排序：已持有优先 → 稀有度高优先 → 等级高优先
   return [...cards].sort((a, b) => {
+    const aOwned = cardStore.ownedCardIds.has(a.id) ? 1 : 0;
+    const bOwned = cardStore.ownedCardIds.has(b.id) ? 1 : 0;
+    if (bOwned !== aOwned) return bOwned - aOwned;
+
     const orderA = RARITY_ORDER[a.rarity] ?? 0;
     const orderB = RARITY_ORDER[b.rarity] ?? 0;
-    return orderB - orderA;
+    if (orderB !== orderA) return orderB - orderA;
+
+    // 同稀有度按等级排序
+    const aLevel = getOwnedInfo(a.id)?.level || 0;
+    const bLevel = getOwnedInfo(b.id)?.level || 0;
+    return bLevel - aLevel;
   });
 });
 
@@ -243,10 +330,38 @@ onMounted(async () => {
   border-radius: $radius-full;
 }
 
+// ========== 筛选工具栏 ==========
+.filter-toolbar {
+  padding: 12px 16px 0;
+}
+
+.filter-toggles {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 6px;
+  padding-bottom: 4px;
+}
+
+.toggle-btn {
+  padding: 5px 14px;
+  border-radius: $radius-full;
+  font-size: 12px;
+  font-weight: 500;
+  background: $bg-card;
+  border: 1px solid $border-color;
+  color: $text-secondary;
+  transition: all $transition-normal;
+
+  &.active {
+    background: rgba($color-primary, 0.1);
+    border-color: rgba($color-primary, 0.3);
+    color: $color-primary-dark;
+  }
+}
+
 .rarity-tabs {
   display: flex;
   gap: 6px;
-  padding: 12px 16px;
   overflow-x: auto;
   scrollbar-width: none;
   &::-webkit-scrollbar { display: none; }
@@ -280,11 +395,88 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  padding: 0 16px 16px;
+  padding: 8px 16px 16px;
+
+  // 卡牌帧需要 relative 使 overlay 定位正确
+  .card-frame {
+    position: relative;
+  }
 }
 
 .card-placeholder-icon {
   font-size: 32px;
+}
+
+// ========== 卡牌角标重设 (二次元高级感) ==========
+.card-badges {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  overflow: hidden;
+  z-index: 2;
+}
+
+// 等级：左上角斜切护身符/缎带风格
+.badge-level {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: linear-gradient(135deg, rgba(20, 20, 20, 0.95), rgba(60, 60, 60, 0.85));
+  padding: 2px 8px 3px 6px;
+  border-bottom-right-radius: $radius-lg;
+  border-top-right-radius: $radius-lg;
+  border-top-left-radius: inherit;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  
+  .level-text {
+    font-size: 11px;
+    font-weight: 900;
+    font-style: italic;
+    color: #fcebcf; // 白金色
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+    letter-spacing: 0.5px;
+    line-height: 1;
+  }
+}
+
+// 星级：卡图底部居中，名字上方
+.badge-stars {
+  position: absolute;
+  bottom: 40px; // 刚好在图片底部
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 1px;
+  padding-bottom: 4px;
+  padding-top: 16px;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.75) 0%, transparent 100%);
+  
+  .mini-star {
+    font-size: 9px;
+    color: #FFD700;
+    line-height: 1;
+    text-shadow: 0 0 3px rgba(255, 215, 0, 0.8), 0 1px 4px rgba(0, 0, 0, 1);
+  }
+}
+
+// 数量：右上角简单文字显示
+.badge-count {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  color: #FDE8A4; // 淡金色
+  font-size: 14px;
+  font-weight: 900;
+  font-family: 'Inter', system-ui, sans-serif;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 4px rgba(253, 232, 164, 0.4);
+  pointer-events: none;
+  z-index: 3;
 }
 
 // 底部 Tab
@@ -461,5 +653,47 @@ onMounted(async () => {
   padding: 10px 12px;
   font-size: 13px;
   border-radius: $radius-md;
+}
+
+// ========== 详情弹窗卡牌统计 ==========
+.detail-card-stats {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.stat-chip {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: $radius-md;
+  backdrop-filter: blur(6px);
+}
+
+.stat-chip-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.stat-chip-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+}
+
+.star-on {
+  color: #FFD700;
+  font-size: 11px;
+}
+
+.star-off {
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 11px;
 }
 </style>

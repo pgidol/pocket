@@ -98,6 +98,7 @@ export const ROUTE_NAMES = {
   TEAM_FORM: 'TeamForm',
   BATTLE: 'Battle',
   CARD_UPGRADE: 'CardUpgrade',
+  EQUIPMENT: 'Equipment',
 };
 
 /** 阵营克制关系（前端展示用） */
@@ -116,4 +117,14 @@ export const CHAPTER_CONFIG = [
 
 /** 体力常量 */
 export const MAX_STAMINA = 120;
+
+/** 装备槽位配置 */
+export const EQUIPMENT_SLOTS = {
+  head: { label: '头部', icon: '🪖' },
+  armor: { label: '护甲', icon: '🛡️' },
+  legs: { label: '腿部', icon: '🦿' },
+  boots: { label: '鞋子', icon: '👢' },
+  weapon: { label: '武器', icon: '⚔️' },
+  accessory: { label: '饰品', icon: '💍' },
+};
 
