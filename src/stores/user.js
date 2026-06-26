@@ -13,6 +13,8 @@ export const useUserStore = defineStore('user', {
     /** @type {number} */
     diamond: 0,
     /** @type {number} */
+    equipFragments: 0,
+    /** @type {number} */
     level: 1,
     /** @type {number} */
     totalPulls: 0,
@@ -46,6 +48,7 @@ export const useUserStore = defineStore('user', {
       this.profile = user;
       this.gold = user.gold ?? 0;
       this.diamond = user.diamond ?? 0;
+      this.equipFragments = user.equipFragments ?? 0;
       this.level = user.level ?? 1;
       this.totalPulls = user.totalPulls ?? 0;
       this.stamina = user.stamina ?? 120;
@@ -54,12 +57,22 @@ export const useUserStore = defineStore('user', {
     },
 
     /**
-     * 更新货币
-     * @param {{ gold?: number, diamond?: number }} currency
+     * 更新货币/资源
+     * @param {{ gold?: number, diamond?: number, equipFragments?: number }} currency
      */
-    updateCurrency({ gold, diamond }) {
-      if (gold !== undefined) this.gold = gold;
-      if (diamond !== undefined) this.diamond = diamond;
+    updateCurrency({ gold, diamond, equipFragments }) {
+      if (gold !== undefined) {
+        this.gold = gold;
+        if (this.profile) this.profile.gold = gold;
+      }
+      if (diamond !== undefined) {
+        this.diamond = diamond;
+        if (this.profile) this.profile.diamond = diamond;
+      }
+      if (equipFragments !== undefined) {
+        this.equipFragments = equipFragments;
+        if (this.profile) this.profile.equipFragments = equipFragments;
+      }
     },
 
     /**
@@ -85,6 +98,7 @@ export const useUserStore = defineStore('user', {
       this.profile = null;
       this.gold = 0;
       this.diamond = 0;
+      this.equipFragments = 0;
       this.level = 1;
       this.totalPulls = 0;
       this.stamina = 120;

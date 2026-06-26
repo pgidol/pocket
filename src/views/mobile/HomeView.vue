@@ -62,6 +62,15 @@
               <button class="btn-gold activity-btn">前往抽卡</button>
             </div>
           </div>
+          <div class="activity-card activity-craft" @click="router.push({ name: ROUTE_NAMES.EQUIPMENT })">
+            <div class="activity-bg"></div>
+            <div class="activity-content">
+              <span class="activity-tag tag-craft">打造</span>
+              <h4 class="activity-title">装备打造工坊</h4>
+              <p class="activity-desc">消耗碎片打造强力装备，提升召唤师战力</p>
+              <button class="btn-secondary activity-btn">前往打造</button>
+            </div>
+          </div>
           <div class="activity-card activity-checkin" @click="router.push({ name: ROUTE_NAMES.CHECKIN })">
             <div class="activity-content">
               <span class="activity-tag tag-green">每日</span>
@@ -446,6 +455,10 @@ const handleLogout = async () => {
   background: linear-gradient(135deg, #C8E6C9 0%, #B2DFDB 100%);
 }
 
+.activity-craft {
+  background: linear-gradient(135deg, #D7CCC8 0%, #BCAAA4 50%, #D4A574 100%);
+}
+
 .activity-content {
   position: relative;
   z-index: 1;
@@ -464,6 +477,10 @@ const handleLogout = async () => {
 
 .tag-green {
   background: rgba(76, 175, 80, 0.8);
+}
+
+.tag-craft {
+  background: rgba(141, 110, 99, 0.85);
 }
 
 .activity-title {

@@ -6,6 +6,7 @@
       <div class="header-currency">
         <span class="currency gold">💰 {{ userStore.gold }}</span>
         <span class="currency diamond">💎 {{ userStore.diamond }}</span>
+        <span class="currency fragment" v-if="userStore.equipFragments !== undefined">🧩 {{ userStore.equipFragments }}</span>
       </div>
     </header>
 
@@ -22,6 +23,29 @@
             @click="handleBuy(item)"
           >
             <div v-if="item.tag" class="product-tag gold-tag">{{ item.tag }}</div>
+            <span class="product-icon">{{ item.icon }}</span>
+            <h4 class="product-name">{{ item.name }}</h4>
+            <p class="product-desc">{{ item.desc }}</p>
+            <div class="product-price diamond-price">
+              <span class="price-icon">💎</span>
+              <span class="price-value">{{ item.price }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 钻石兑换装备碎片 -->
+      <section class="shop-section">
+        <h3 class="section-title"><span class="section-icon">🧩</span> 钻石兑换装备碎片</h3>
+        <div class="product-grid">
+          <div
+            v-for="item in fragmentExchangePacks"
+            :key="item.id"
+            class="product-card fragment-exchange-card"
+            :class="{ featured: item.featured }"
+            @click="handleBuy(item)"
+          >
+            <div v-if="item.tag" class="product-tag fragment-tag">{{ item.tag }}</div>
             <span class="product-icon">{{ item.icon }}</span>
             <h4 class="product-name">{{ item.name }}</h4>
             <p class="product-desc">{{ item.desc }}</p>
@@ -126,6 +150,12 @@ const goldExchangePacks = [
   { id: 'gold_1000', name: '金币至尊包', desc: '130,000 金币', icon: '💰', price: 1000, currency: 'diamond', tag: '最划算', featured: true },
 ];
 
+const fragmentExchangePacks = [
+  { id: 'equip_fragment_100', name: '碎片小包', desc: '1,000 装备碎片', icon: '🧩', price: 100, currency: 'diamond', tag: null, featured: false },
+  { id: 'equip_fragment_500', name: '碎片中包', desc: '5,000 装备碎片', icon: '🧩', price: 500, currency: 'diamond', tag: '推荐', featured: true },
+  { id: 'equip_fragment_1000', name: '碎片大包', desc: '10,000 装备碎片', icon: '🧩', price: 1000, currency: 'diamond', tag: '最划算', featured: true },
+];
+
 const specialItems = [
   { id: 'lucky_charm', name: '幸运符', desc: '下次抽卡 SSR 概率 +5%（单次生效）', icon: '🍀', price: 50, currency: 'diamond' },
   { id: 'pity_reset', name: '命运转盘', desc: '重置 SSR 保底计数器为 80', icon: '🎡', price: 30, currency: 'diamond' },
@@ -143,7 +173,7 @@ const confirmBuy = async () => {
     const result = await request.post('/shop/buy', {
       itemId: confirmItem.value.id,
     });
-    userStore.updateCurrency({ gold: result.gold, diamond: result.diamond });
+    userStore.updateCurrency({ gold: result.gold, diamond: result.diamond, equipFragments: result.equipFragments });
     uiStore.toast(`成功购买 ${confirmItem.value.name}！`, 'success');
     showConfirm.value = false;
   } catch (error) {
@@ -335,6 +365,18 @@ const confirmBuy = async () => {
 
 .gold-tag {
   background: linear-gradient(135deg, $color-warning, #FFD54F) !important;
+}
+
+// 钻石兑换装备碎片卡片
+.fragment-exchange-card {
+  &.featured {
+    border-color: rgba($color-primary, 0.4);
+    box-shadow: 0 4px 16px rgba($color-primary, 0.15);
+  }
+}
+
+.fragment-tag {
+  background: linear-gradient(135deg, $color-primary, #8E44AD) !important;
 }
 
 .diamond-price {
